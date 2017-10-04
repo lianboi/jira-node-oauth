@@ -1,7 +1,7 @@
 {
   "name": "express-example",
   "version": "1.0.0",
-  "description": "",
+  "description": "This module is involved in authenticating JIRA REST API calls from your Node.js application using OAuth",
   "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
