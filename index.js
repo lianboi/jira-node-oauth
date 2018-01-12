@@ -5,7 +5,7 @@ var fs = require('fs');
 
 var app = express();
 
-app.use(session({ secret: "red" }));
+app.use(session({ secret: 'red', saveUninitialized: true, resave: true }));
 
 app.get('/', function(req, res) {
     res.send("Hello World!");
@@ -24,8 +24,8 @@ app.get('/jira', function(req, res) {
         "RSA-SHA1");
     oa.getOAuthRequestToken(function(error, oauthToken, oauthTokenSecret) {
         if (error) {
-            console.log(error.data);
-            response.send('Error getting OAuth access token');
+            console.log('Error:', error);
+            res.send('Error getting OAuth access token');
         } else {
             req.session.oa = oa;
             req.session.oauth_token = oauthToken;
@@ -36,6 +36,7 @@ app.get('/jira', function(req, res) {
 });
 
 app.get('/jira/callback', function(req, res) {
+    console.log(req.query);
     var oa = new OAuth(req.session.oa._requestUrl,
         req.session.oa._accessUrl,
         req.session.oa._consumerKey,
@@ -48,11 +49,11 @@ app.get('/jira/callback', function(req, res) {
     oa.getOAuthAccessToken(
         req.session.oauth_token,
         req.session.oauth_token_secret,
-        req.param('oauth_verifier'),
+        req.query.oauth_verifier,
         function(error, oauth_access_token, oauth_access_token_secret, results2) {
             if (error) {
-                console.log('error');
-                console.log(error);
+                console.log('Error:', error);
+                res.send('Error verifying OAuth access token');
             } else {
                 // store the access token in the session
                 req.session.oauth_access_token = oauth_access_token;
