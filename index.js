@@ -25,7 +25,7 @@ app.get('/jira', function(req, res) {
     oa.getOAuthRequestToken(function(error, oauthToken, oauthTokenSecret) {
         if (error) {
             console.log('Error:', error);
-            res.send('Error getting OAuth access token');
+            res.send('STEP 1: Error requesting OAuth access token');
         } else {
             req.session.oa = oa;
             req.session.oauth_token = oauthToken;
@@ -36,7 +36,10 @@ app.get('/jira', function(req, res) {
 });
 
 app.get('/jira/callback', function(req, res) {
-    console.log(req.query);
+    if (req.query.oauth_verifier === 'denied') {
+      console.log('Error:', {'oauth_verifier': 'denied'})
+      return res.send('STEP 2: Error authorizing OAuth access token')
+    }
     var oa = new OAuth(req.session.oa._requestUrl,
         req.session.oa._accessUrl,
         req.session.oa._consumerKey,
@@ -53,7 +56,7 @@ app.get('/jira/callback', function(req, res) {
         function(error, oauth_access_token, oauth_access_token_secret, results2) {
             if (error) {
                 console.log('Error:', error);
-                res.send('Error verifying OAuth access token');
+                res.send('STEP 3: Error accessing OAuth access token');
             } else {
                 // store the access token in the session
                 req.session.oauth_access_token = oauth_access_token;
